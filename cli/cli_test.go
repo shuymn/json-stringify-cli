@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"os"
-	"strings"
 	"testing"
 )
 
@@ -64,9 +63,8 @@ func TestRun(t *testing.T) {
 			t.Fatalf("want no error when read buffer from stdout. got: %s", err)
 		}
 
-		got := strings.TrimRight(buf.String(), "\n")
-		if tc.want != got {
-			t.Errorf("want: %q. got: %q", tc.want, got)
+		if tc.want != buf.String() {
+			t.Errorf("want: %q. got: %q", tc.want, buf.String())
 		}
 	}
 }
