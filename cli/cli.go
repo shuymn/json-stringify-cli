@@ -33,7 +33,7 @@ func (c *CLI) Run() error {
 		return xerrors.Errorf("%v", err)
 	}
 
-	fmt.Println(string(b))
+	fmt.Print(string(b))
 
 	return nil
 }
