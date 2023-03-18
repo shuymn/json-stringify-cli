@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alecthomas/kingpin"
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/shuymn/json-stringify-cli/cli"
 )
 
