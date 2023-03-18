@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 )
@@ -18,7 +18,7 @@ func New(path string) *CLI {
 }
 
 func (c *CLI) Run() error {
-	b, err := ioutil.ReadFile(c.path)
+	b, err := os.ReadFile(c.path)
 	if err != nil {
 		return errors.Errorf("%v", err)
 	}
