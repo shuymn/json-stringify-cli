@@ -1,6 +1,6 @@
 module github.com/shuymn/json-stringify-cli
 
-go 1.21.4
+go 1.21.5
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.3.2
