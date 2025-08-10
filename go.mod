@@ -3,7 +3,7 @@ module github.com/shuymn/json-stringify-cli
 go 1.21.6
 
 require (
-	github.com/alecthomas/kingpin/v2 v2.3.2
+	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/pkg/errors v0.9.1
 )
 
