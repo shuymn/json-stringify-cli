@@ -21,10 +21,10 @@ Requires Go 1.21.6+.
 ## Usage
 
 ```bash
-json-stringify [--debug] [json-path]
+json-stringify [-debug] [json-path]
 ```
 
-- `--debug`: enable verbose error formatting when available (no stack traces by default)
+- `-debug`: enable verbose error formatting when available (no stack traces by default)
 - `[json-path]`: path to the input JSON file (optional)
   - If omitted or `-`, reads from stdin
   - If provided, reads from the specified file
@@ -101,7 +101,7 @@ The tool outputs a JSON string literal, so internal quotes are escaped. For exam
 - `0` on success
 - `1` on error (e.g., invalid JSON, file not found, or stdin read error)
   - Errors are written to stderr
-  - Use `--debug` to enable verbose error formatting when supported by underlying errors; this tool does not add stack traces by itself
+  - Use `-debug` to enable verbose error formatting when supported by underlying errors; this tool does not add stack traces by itself
 
 ## Build From Source
 
