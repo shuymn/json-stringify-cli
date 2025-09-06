@@ -31,10 +31,21 @@ func run() int {
 
 	flag.Parse()
 
+	// If no args are provided and stdin is a TTY (i.e., not piped),
+	// show help instead of blocking on stdin.
+	if len(flag.Args()) == 0 {
+		if fi, err := os.Stdin.Stat(); err == nil {
+			if (fi.Mode() & os.ModeCharDevice) != 0 {
+				flag.Usage()
+				return ExitCodeErr
+			}
+		}
+	}
+
 	args := flag.Args()
 	var fp string
 	if len(args) < 1 {
-		// No arguments means read from stdin
+		// No arguments with piped stdin: read from stdin
 		fp = ""
 	} else {
 		fp = args[0]
