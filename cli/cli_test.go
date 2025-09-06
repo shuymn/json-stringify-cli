@@ -2,7 +2,7 @@ package cli
 
 import (
 	"bytes"
-	"os"
+	"io"
 	"testing"
 )
 
@@ -41,26 +41,12 @@ func TestRun(t *testing.T) {
 			},
 		}
 
-	tmpStdout := os.Stdout
-	defer func() {
-		os.Stdout = tmpStdout
-	}()
-
 	for _, tc := range testcases {
-		r, w, _ := os.Pipe()
-		os.Stdout = w
-
-		c := New(tc.path)
+		buf := new(bytes.Buffer)
+		c := New(tc.path, buf)
 		err := c.Run()
-		w.Close()
 		if err != nil {
 			t.Fatalf("want no error. got: %s", err)
-		}
-
-		var buf bytes.Buffer
-		_, err = buf.ReadFrom(r)
-		if err != nil {
-			t.Fatalf("want no error when read buffer from stdout. got: %s", err)
 		}
 
 		if tc.want != buf.String() {
@@ -76,23 +62,23 @@ func TestRun_error(t *testing.T) {
 		{
 			subtitle: "invalid json",
 			path:     "testdata/sample-08.json",
-			want:     "invalid character '\\n' in string literal",
+			want:     "failed to compact JSON: invalid character '\\n' in string literal",
 		},
 		{
 			subtitle: "empty file",
 			path:     "testdata/sample-09.json",
-			want:     "unexpected end of JSON input",
+			want:     "failed to compact JSON: unexpected end of JSON input",
 		},
 		{
 			subtitle: "file not exist",
 			path:     "testdata/sample-99.json",
-			want:     "open testdata/sample-99.json: no such file or directory",
+			want:     "failed to read file: open testdata/sample-99.json: no such file or directory",
 		},
 	}
 
 	for _, tc := range testcases {
 		t.Run(tc.subtitle, func(t *testing.T) {
-			c := New(tc.path)
+			c := New(tc.path, io.Discard)
 			err := c.Run()
 			if err == nil {
 				t.Fatal("want error. got nil")

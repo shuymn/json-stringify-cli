@@ -1,10 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
-	"github.com/alecthomas/kingpin/v2"
 	"github.com/shuymn/json-stringify-cli/cli"
 )
 
@@ -14,23 +14,33 @@ const (
 )
 
 func main() {
-	os.Exit(_main())
+	os.Exit(run())
 }
 
-func _main() int {
-	debug := kingpin.Flag("debug", "Enable debug log").Bool()
-	fp := kingpin.Arg("json-path", "Specify json file path").Required().String()
+func run() int {
+	var debug bool
+	flag.BoolVar(&debug, "debug", false, "Enable debug log")
 
-	kingpin.Parse()
+	flag.Parse()
 
-	c := cli.New(*fp)
+	args := flag.Args()
+	if len(args) < 1 {
+		fmt.Fprintf(os.Stderr, "Error: json-path argument is required\n")
+		fmt.Fprintf(os.Stderr, "Usage: %s [flags] <json-path>\n", os.Args[0])
+		flag.PrintDefaults()
+		return ExitCodeErr
+	}
+
+	fp := args[0]
+
+	c := cli.New(fp, os.Stdout)
 	if err := c.Run(); err != nil {
 		format := "%v\n"
-		if *debug {
+		if debug {
 			// print a log message with stack trace when debug mode is enable
 			format = "%+v\n"
 		}
-		fmt.Printf(format, err)
+		fmt.Fprintf(os.Stdout, format, err)
 		return ExitCodeErr
 	}
 	return ExitCodeOK
