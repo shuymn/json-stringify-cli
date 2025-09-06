@@ -1,6 +1,14 @@
 # json-stringify-cli
 
-CLI tool that reads a JSON file, compacts it (removes whitespace), and outputs a single JSON string literal containing that JSON. Useful when you need the JSON embedded as a string value.
+CLI tool that reads JSON from a file or stdin, compacts it (removes whitespace), and outputs a single JSON string literal containing that JSON. Useful when you need the JSON embedded as a string value.
+
+## Features
+
+- Read JSON from files or standard input
+- Compact JSON output (removes unnecessary whitespace)
+- Output as JSON string literal with proper escaping
+- Zero external dependencies (uses only Go standard library)
+- Helpful error messages with optional debug mode
 
 ## Installation
 
@@ -8,18 +16,22 @@ CLI tool that reads a JSON file, compacts it (removes whitespace), and outputs a
 go install github.com/shuymn/json-stringify-cli/cmd/json-stringify@latest
 ```
 
-Requires Go 1.21+.
+Requires Go 1.21.6+.
 
 ## Usage
 
 ```bash
-json-stringify [--debug] <json-path>
+json-stringify [--debug] [json-path]
 ```
 
-- `--debug`: print errors with stack traces.
-- `<json-path>`: path to the input JSON file (required).
+- `--debug`: print errors with detailed information
+- `[json-path]`: path to the input JSON file (optional)
+  - If omitted or `-`, reads from stdin
+  - If provided, reads from the specified file
 
 ## Examples
+
+### Reading from a file
 
 Given `sample.json`:
 
@@ -36,22 +48,60 @@ Run:
 json-stringify sample.json
 ```
 
-Output (to stdout):
+Output:
 
 ```
-{"color":"red","value":"#f00"}
+"{\"color\":\"red\",\"value\":\"#f00\"}"
 ```
 
-Note: the tool prints a JSON string literal, so quotes inside are escaped. For an array like `[100, 500, 300, 200, 400]`, the output is:
+### Reading from stdin
+
+Using pipe:
+
+```bash
+echo '{"name": "test", "value": 123}' | json-stringify
+```
+
+Output:
 
 ```
-[100,500,300,200,400]
+"{\"name\":\"test\",\"value\":123}"
 ```
+
+Using redirection:
+
+```bash
+json-stringify < sample.json
+```
+
+Or explicitly with `-`:
+
+```bash
+cat sample.json | json-stringify -
+```
+
+### Processing API responses
+
+```bash
+curl -s https://api.example.com/data | json-stringify
+```
+
+### Note on output format
+
+The tool outputs a JSON string literal, so internal quotes are escaped. For example:
+
+- Input: `{"key": "value"}`
+- Output: `"{\"key\":\"value\"}"`
+
+- Input: `[1, 2, 3]`
+- Output: `"[1,2,3]"`
 
 ## Exit Status
 
-- `0` on success.
-- `1` on error (e.g., invalid JSON or file not found). Use `--debug` to include a stack trace in the error message.
+- `0` on success
+- `1` on error (e.g., invalid JSON, file not found, or stdin read error)
+  - Errors are written to stderr
+  - Use `--debug` for more detailed error information
 
 ## Build From Source
 
