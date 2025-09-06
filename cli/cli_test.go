@@ -43,7 +43,7 @@ func TestRun(t *testing.T) {
 
 	for _, tc := range testcases {
 		buf := new(bytes.Buffer)
-		c := New(tc.path, buf)
+		c := New(tc.path, nil, buf) // stdin is not used for file paths
 		err := c.Run()
 		if err != nil {
 			t.Fatalf("want no error. got: %s", err)
@@ -78,7 +78,92 @@ func TestRun_error(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.subtitle, func(t *testing.T) {
-			c := New(tc.path, io.Discard)
+			c := New(tc.path, nil, io.Discard) // stdin is not used for file paths
+			err := c.Run()
+			if err == nil {
+				t.Fatal("want error. got nil")
+			}
+			if err.Error() != tc.want {
+				t.Errorf("want: %q. got: %q", tc.want, err.Error())
+			}
+		})
+	}
+}
+
+func TestRun_stdin(t *testing.T) {
+	testcases := []struct {
+		subtitle string
+		path     string
+		input    string
+		want     string
+	}{
+		{
+			subtitle: "read from stdin with empty path",
+			path:     "",
+			input:    `{"test": "value"}`,
+			want:     `"{\"test\":\"value\"}"`,
+		},
+		{
+			subtitle: "read from stdin with dash path",
+			path:     "-",
+			input:    `[1, 2, 3]`,
+			want:     `"[1,2,3]"`,
+		},
+		{
+			subtitle: "read complex JSON from stdin",
+			path:     "-",
+			input: `{
+				"name": "test",
+				"array": [1, 2, 3],
+				"nested": {
+					"key": "value"
+				}
+			}`,
+			want: `"{\"name\":\"test\",\"array\":[1,2,3],\"nested\":{\"key\":\"value\"}}"`,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.subtitle, func(t *testing.T) {
+			stdin := bytes.NewBufferString(tc.input)
+			stdout := new(bytes.Buffer)
+			c := New(tc.path, stdin, stdout)
+			err := c.Run()
+			if err != nil {
+				t.Fatalf("want no error. got: %s", err)
+			}
+			if tc.want != stdout.String() {
+				t.Errorf("want: %q. got: %q", tc.want, stdout.String())
+			}
+		})
+	}
+}
+
+func TestRun_stdin_error(t *testing.T) {
+	testcases := []struct {
+		subtitle string
+		path     string
+		input    string
+		want     string
+	}{
+		{
+			subtitle: "invalid JSON from stdin",
+			path:     "-",
+			input:    `{"invalid": json}`,
+			want:     "failed to compact JSON: invalid character 'j' looking for beginning of value",
+		},
+		{
+			subtitle: "empty stdin",
+			path:     "-",
+			input:    "",
+			want:     "failed to compact JSON: unexpected end of JSON input",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.subtitle, func(t *testing.T) {
+			stdin := bytes.NewBufferString(tc.input)
+			c := New(tc.path, stdin, io.Discard)
 			err := c.Run()
 			if err == nil {
 				t.Fatal("want error. got nil")

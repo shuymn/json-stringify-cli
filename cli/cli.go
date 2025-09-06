@@ -10,20 +10,33 @@ import (
 
 type CLI struct {
 	path   string
+	stdin  io.Reader
 	stdout io.Writer
 }
 
-func New(path string, stdout io.Writer) *CLI {
+func New(path string, stdin io.Reader, stdout io.Writer) *CLI {
 	return &CLI{
 		path:   path,
+		stdin:  stdin,
 		stdout: stdout,
 	}
 }
 
 func (c *CLI) Run() error {
-	b, err := os.ReadFile(c.path)
-	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
+	var b []byte
+	var err error
+
+	// Read from stdin if path is "-" or empty
+	if c.path == "-" || c.path == "" {
+		b, err = io.ReadAll(c.stdin)
+		if err != nil {
+			return fmt.Errorf("failed to read from stdin: %w", err)
+		}
+	} else {
+		b, err = os.ReadFile(c.path)
+		if err != nil {
+			return fmt.Errorf("failed to read file: %w", err)
+		}
 	}
 
 	var buf bytes.Buffer
