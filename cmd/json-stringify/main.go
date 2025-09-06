@@ -19,7 +19,7 @@ func main() {
 
 func run() int {
 	var debug bool
-    flag.BoolVar(&debug, "debug", false, "Enable verbose error formatting (when available)")
+	flag.BoolVar(&debug, "debug", false, "Enable verbose error formatting (when available)")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [flags] [json-path]\n", os.Args[0])
